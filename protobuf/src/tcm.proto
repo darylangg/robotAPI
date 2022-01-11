@@ -1,0 +1,262 @@
+syntax = "proto3";
+
+package tcm;
+
+option java_package = "com.robot.common.protobuf";
+option java_outer_classname = "TCMProto";
+
+
+message TCM {
+	repeated WaitingPoint waitingPoint = 1;
+	repeated HoldingZone holdingZone =2;
+	repeated TrafficSignalResponse signal =3;
+}
+
+enum AreaType {
+	UNKNOWN = 0;
+	TURNSTILE = 1;
+	LIFT = 2;
+	DOOR = 3;
+	CORRIDOR = 4;
+	RAMP = 5;
+}
+message Position {
+  double longitude = 1;
+  double latitude = 2;
+	double svy21X = 3;
+	double svy21Y = 4;
+	float angleFromNorth = 5;
+	int32 floorLevel = 6;
+}
+
+message WaitingPoint {
+	Position position = 1;
+	string locationName =2;
+	string robotID = 3;
+	AreaType areaType = 4;
+}
+
+message HoldingZone {
+	Position position = 1;
+	string locationName =2;
+	repeated string robotID = 3;
+	repeated Zone zone =4;
+	AreaType areaType = 5;
+}
+//Control Zone structure/info will be stored in a csv since the info is static / 1 time
+
+enum Zone {
+	NONE = 0;
+	ENTER = 1;
+	EXIT = 2;
+}
+
+enum Signal {
+	STOP = 0;
+	GO = 1;
+}
+
+//----------Incoming POST/GET Requests------//
+message TurnstileAccessRequest {
+	string requestID = 1;
+	bool arrived = 2;
+	string robotID = 3;
+	string vendorID = 4;
+	int32 turnstileID = 5;
+	Zone zone = 6;
+	string timestamp = 7;
+}
+message LiftAccessRequest {
+	string requestID = 1;
+	bool arrived = 2;
+	string robotID = 3;
+	string vendorID = 4;
+	LiftID liftID = 5;
+	int32 boardingLevel = 6;
+	int32 destinationLevel = 7;
+	string timestamp = 8;
+}
+message DoorAccessRequest {
+	string requestID = 1;
+	bool arrived = 2;
+	string robotID = 3;
+	string vendorID = 4;
+	int32 currentLevel = 5;
+	int32 doorID = 6;
+	Zone zone = 7;
+	string timestamp = 8;
+}
+
+message TurnstileCheckPermissionRequest {
+	string requestID = 1;
+	string robotID = 2;
+	string vendorID = 3;
+	int32 turnstileID = 4;
+	Zone zone = 5;
+	string timestamp = 6;
+}
+message LiftCheckPermissionRequest {
+	string requestID = 1;
+	string robotID = 2;
+	string vendorID = 3;
+	LiftID liftID = 4;
+	int32 boardingLevel = 5;
+	string timestamp = 6;
+}
+message DoorCheckPermissionRequest {
+	string requestID = 1;
+	string robotID = 2;
+	string vendorID = 3;
+	int32 currentLevel = 4;
+	int32 doorID = 5;
+	Zone zone = 6;
+	string timestamp = 7;
+}
+
+message TurnstileControlMessage { // (6.6)
+	string requestID = 1;
+	string robotID = 2;
+	string vendorID = 3;
+	int32 turnstileID = 4;
+	Zone zone = 5;
+	bool open = 6;
+	bool close = 7;
+	string timestamp = 8;
+}
+
+message DoorControlMessage { // (6.15)
+	string requestID = 1;
+	string robotID = 2;
+	string vendorID = 3;
+	int32 currentLevel = 4;
+	int32 doorID = 5;
+	Zone zone = 6;
+	bool open = 7;
+	bool close = 8;
+	string timestamp = 9;
+}
+
+message LiftSignalMessage { // (6.12)
+	string requestID = 1;
+	string user = 2; // same as robotID
+	string vendorID = 3; // added this
+	LiftID liftID = 4;
+	int32 boardingLevel = 5;
+	int32 destinationLevel = 6;
+	EmbarkationStatus embarkationStatus = 7;
+	int64 epochTime = 8;
+}
+enum EmbarkationStatus {
+	UNDEFINED = 0;
+	WAITING_TO_BOARD = 1;
+	BOARDED = 2;
+	ALIGHTED = 3;
+	BOARDING_FAIL = 4;
+	ALIGHTING_FAIL = 5;
+}
+
+//---------- responses------//
+//rpc reply and C3 notification
+message FacilityAccessResponse {
+	string requestID = 1;
+	string robotID = 2;
+	string message = 3;
+	string timestamp = 4;
+}
+
+message TrafficSignalResponse {
+	string requestID = 1;
+	Signal signal = 2;
+	string robotID = 3;
+	int32 facilityID = 4; // API gateway will discern whether it is door/lift/turnstile based on the original API call (convert LiftID to int)
+	string timestamp = 5;
+}
+
+//------ GET list of robots at holding zone (6.4, 6.9) -----//
+
+message ListRobotsAtTurnstileRequest {
+	string requestID = 1;
+	string vendorID = 2;
+	Zone zone = 3;
+	string timestamp = 4;
+}
+
+message ListRobotsAtLiftRequest {
+	string requestID = 1;
+	string vendorID = 2;
+	int32 level = 3;
+	string timestamp = 4;
+}
+
+message ListOfRobotsResponse {
+	string requestID = 1;
+	repeated string robotIDs = 2;
+	string timestamp = 3;
+}
+
+message ListOfRobotsLiftUpdate {
+	map<int32, ListOfRobotsResponse> robotsPerLevel = 1; // int32 is for each level in the building
+	string timestamp = 2;
+}
+
+message ListOfApprovedRobotsUpdate {
+	map<string, int32> approvedRobots = 1; // string is for vendorID+robotID, int32 is for doorID/turnstileID/liftID
+	string timestamp = 2;
+}
+
+//---------- Security Checkpoint------//
+
+message SecurityCheckpointRequest {
+	string requestID = 1;
+	bool arrived = 2;
+	repeated string destination = 3;
+	string robotID = 4;
+	string vendorID = 5;
+	string url = 6;
+	string timestamp = 7;
+}
+
+message ListRobotsAtSecurityRequest {
+	string requestID = 1;
+	string vendorID = 2;
+	string timestamp = 3;
+}
+
+//---------- future development------//
+
+message Presence {
+	string robotID = 1;
+	string deviceID = 2;
+	int32 level = 3;
+}
+
+message Heartbeat // Heartbeats to services
+{
+	int64 timestamp = 1;
+}
+
+//---------- from jtc_lift.proto ------//
+enum LiftID
+{
+	LIFT_UNDEFINED = 0;
+	LIFT_1 = 1;
+	LIFT_2 = 2;
+	LIFT_3 = 3;
+	LIFT_4 = 4;
+	LIFT_5 = 5;
+	LIFT_6 = 6;
+	LIFT_7 = 7;
+	LIFT_8 = 8;
+	LIFT_9 = 9;
+	LIFT_10 = 10;
+	LIFT_11 = 11;
+	LIFT_12 = 12;
+	LIFT_13 = 13;
+	LIFT_14 = 14;
+	LIFT_15 = 15;
+	LIFT_16 = 16;
+	LIFT_17 = 17;
+	LIFT_18 = 18;
+	LIFT_19 = 19;
+	LIFT_20 = 20;
+}

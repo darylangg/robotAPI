@@ -1,0 +1,234 @@
+syntax = "proto3";
+
+package lift;
+
+option java_package = "com.lift.common.protobuf";
+option java_outer_classname = "JtcLiftProto";
+option csharp_namespace = "JtcLiftProto";
+
+enum LiftID
+{
+  LIFT_UNDEFINED = 0;
+  LIFT_1 = 1;
+  LIFT_2 = 2;
+  LIFT_3 = 3;
+  LIFT_4 = 4;
+  LIFT_5 = 5;
+  LIFT_6 = 6;
+  LIFT_7 = 7;
+  LIFT_8 = 8;
+  LIFT_9 = 9;
+  LIFT_10 = 10;
+  LIFT_11 = 11;
+  LIFT_12 = 12;
+  LIFT_13 = 13;
+  LIFT_14 = 14;
+  LIFT_15 = 15;
+  LIFT_16 = 16;
+  LIFT_17 = 17;
+  LIFT_18 = 18;
+  LIFT_19 = 19;
+  LIFT_20 = 20;
+}
+
+enum ODP
+{
+  NO_ODP_MODE = 0;
+  ODP_ROBOT_MODE = 1;
+  ODP_VIP_MODE = 2;
+}
+
+enum Mode {
+  UNDEFINED_MODE = 0;
+  EDGE_DISCONNECTED = 1;
+  NORMAL = 2;
+  SERVICING = 3;
+  OUT_OF_ORDER = 4;
+  POWER_FAILURE = 5;
+  MODE_FIVE = 6;
+  MODE_SIX = 7;
+  MODE_SEVEN = 8;
+  MODE_EIGHT = 9;
+  EMERGENCY = 10;
+  MODE_TEN = 11;
+  MODE_ELEVEN = 12;
+  MODE_TWELVE = 13;
+  FIRE = 14;
+  ROBOT_MODE = 15;
+  VIP_MODE = 16;
+}
+
+enum MoveStatus {
+  UNDEFINED_MOVE = 0;
+  STATIONARY = 1;
+  UP = 2;
+  DOWN = 3;
+}
+
+enum DoorControl {
+  UNDEFINED_DOOR_ACTION = 0;
+  CLOSE = 1;
+  OPEN = 2;
+}
+
+enum JtcLiftRpcMode
+{
+  INITIALIZE = 0;
+}
+
+enum ReservationStatus {
+  ACCEPTED = 0;
+  TO_BOARDING = 1;
+  BOARDING_OPEN = 2;
+  TO_DESTINATION = 3;
+  DESTINATION_OPEN = 4;
+  RESERVATION_IN_SESSION = 5;
+  RESERVATION_ENDED = 6;
+  REQUEST_FAILED = 7;
+}
+
+enum ReservationUpdateMode {
+  RELEASE = 0;
+  EXTEND = 1;
+}
+
+//------------------Lift data----------------------//
+
+message JtcLiftData {
+  LiftID liftID = 1;
+  bool isCarFull = 2;
+  int32 currentLocation = 3;
+  MoveStatus moveStatus = 4;
+  Mode mode = 5;
+  bool isDoorFullyOpened = 6;
+  bool isDoorFullyClosed = 7;
+  int64 epochTime = 8;
+}
+
+message JtcLiftDataPayload {
+  string requestID = 1;
+  string user = 2;
+  repeated JtcLiftData liftDataArray = 3;
+  int64 epochTime = 4;
+}
+
+
+//------------------Initialization request----------------------//
+
+message JtcLiftRpcRequest
+{
+  string requestID = 1;
+  string user = 2;
+  repeated LiftID liftIDArray = 3;
+  JtcLiftRpcMode modeRequest = 4;
+  int64 epochTime = 5;
+}
+
+//------------------Control payload----------------------//
+
+message JtcLiftControlPayload {
+  string requestID = 1;
+  string user = 2;
+  LiftID liftID = 3;
+  ODP odpMode = 4;
+  int32 locationRequest = 5;
+  DoorControl doorControl = 6;
+  bool isLoadingMode = 7;
+  int64 epochTime = 8;
+}
+
+message JtcLiftControlReply
+{
+  string requestID = 1;
+  string user = 2;
+  LiftID liftID = 3;
+  int64 epochTime = 4;
+}
+
+//------------------Reservation requests----------------------//
+enum EmbarkationStatus {
+  UNDEFINED = 0;
+  WAITING_TO_BOARD = 1;
+  BOARDED = 2;
+  ALIGHTED = 3;
+  BOARDING_FAIL = 4;
+  ALIGHTING_FAIL = 5;
+}
+
+message JtcLiftReservationRequest {
+  string requestID = 1;
+  string user = 2; // same as robotID
+  string vendorID = 3; // added this
+  LiftID liftID = 4;
+  int32 boardingLevel = 5;
+  int32 destinationLevel = 6;
+  int64 reservationStartDateTime = 7;
+  int64 reservationEndDateTime = 8;
+  int64 epochTime = 9;
+}
+message JtcLiftReservationUpdate {
+  string requestID = 1;
+  string user = 2; // same as robotID
+  string vendorID = 3; // added this
+  ReservationUpdateMode reservationUpdateMode = 4;
+  int64 epochTime = 5;
+}
+message JtcLiftReservationReply {
+  string requestID = 1;
+  string user = 2; // same as robotID
+  string vendorID = 3; // added this
+  LiftID liftID = 4;
+  int32 currentLevel = 5;
+  ReservationStatus reservationStatus = 6;
+  string failureDescription = 7;
+  int64 epochTime = 8;
+}
+message JtcRobotEmbarkationNotification {
+  string requestID = 1;
+  string user = 2; // same as robotID
+  string vendorID = 3; // added this
+  LiftID liftID = 4;
+  int32 boardingLevel = 5;
+  int32 destinationLevel = 6;
+  EmbarkationStatus embarkationStatus = 7;
+  int64 epochTime = 8;
+}
+
+message JtcRobotApiResponse {
+  string requestID = 1;
+  string user = 2; // same as robotID
+  string vendorID = 3; // added this
+  LiftID liftID = 4;
+  string message = 5;
+  int64 epochTime = 6;
+}
+
+//-----------------------Notifications-------------------------//
+enum Severity {
+  INFO = 0;
+  ALERT = 1;
+  WARNING = 2;
+  CRITICAL = 3;
+}
+
+enum OpType {
+  STATUS = 0;
+  ALARM = 1;
+  REQUEST = 2;
+}
+
+enum EntityLevel {
+  DEVICE = 0;
+  SYSTEM = 1;
+}
+
+message JtcLiftNotifications { // TODO EDIT THIS PART WHEN CONFIRMED
+  string id = 1;
+  string group = 2;
+  Severity severity = 3;
+  string title = 4;
+  string description = 5;
+  OpType optype = 6;
+  string utc_timestamp = 7;
+  repeated string data = 8;
+}

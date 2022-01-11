@@ -1,0 +1,87 @@
+syntax = "proto3";
+package door;
+
+option java_package = "org.door.common.protobuf";
+option java_outer_classname = "DoorDataProto";
+option csharp_namespace = "DoorDataProto";
+
+enum Status // Door status
+{
+  UNKNOWN=0;
+  OPEN=1;
+  CLOSE=2;
+}
+
+enum DoorHealth // Door Health Status
+{
+  UNAVAILABLE=0;
+  NORMAL=1;
+  ALARM=2;
+}
+
+message DoorReading // Single Door Reading
+{
+  string doorName=1;
+  Status status=2;
+  DoorHealth doorHealth=3;
+  bool isMechanized=4;
+  int64 readingDatetime=5;
+}
+
+message DoorData // Multiple door reading
+{
+  int64 timestamp=1;
+  int64 statusCode=2;
+  repeated DoorReading doorReading=3;
+}
+
+enum AccessEvent //Access Events
+{
+  DOOR_CLOSE=0;
+  ACCESS_ALARM=1;
+  DOOR_OPEN_TIME_OUT=2;
+  ENTRANCE_PASS=3;
+  EXIT_PASS=4;
+  RELEASED_BUTTON=5;
+  NO_PERMIT_CARD_ENTRANCE=6;
+  NO_PERMIT_CARD_EXIT=7;
+  NO_TIME_ENTRANCE=8;
+  NO_TIME_EXIT=9;
+  NO_PERMIT_DOOR_ENTRANCE=10;
+  NO_PERMIT_DOOR_EXIT=11;
+}
+
+message AccessReading // Access attempt
+{
+  string doorName=1;
+  string cardID=2;
+  AccessEvent event=3;
+  int64 readingDatetime=4;
+}
+
+message AccessData // Access attempt
+{
+  int64 timestamp=1;
+  int64 statusCode=2;
+  repeated AccessReading accessReadings=3;
+}
+
+message RPCRequest // To send RPC request
+{
+  string requestID=1;
+  repeated string doorName=2;
+  string groupName=3;
+  Status statusToSet=4;
+  int64 requestTime=5;
+  string userID=6;
+}
+
+message RPCReply // To send RPC reply
+{
+  string requestID=1;
+  repeated DoorReading successfulReadings=2;
+  repeated DoorReading unsuccessfulReadings=3;
+  int64 statusCode=4;
+  int64 replyTime=5;
+  string userID=6;
+}
