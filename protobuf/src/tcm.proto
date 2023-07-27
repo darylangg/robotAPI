@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package tcm;
 
-option java_package = "com.robot.common.protobuf";
+option java_package = "com.lift.common.protobuf";
 option java_outer_classname = "TCMProto";
 
 
@@ -71,7 +71,7 @@ message LiftAccessRequest {
 	bool arrived = 2;
 	string robotID = 3;
 	string vendorID = 4;
-	LiftID liftID = 5;
+	int32 liftID = 5;
 	int32 boardingLevel = 6;
 	int32 destinationLevel = 7;
 	string timestamp = 8;
@@ -99,7 +99,7 @@ message LiftCheckPermissionRequest {
 	string requestID = 1;
 	string robotID = 2;
 	string vendorID = 3;
-	LiftID liftID = 4;
+	int32 liftID = 4;
 	int32 boardingLevel = 5;
 	string timestamp = 6;
 }
@@ -140,7 +140,7 @@ message LiftSignalMessage { // (6.12)
 	string requestID = 1;
 	string user = 2; // same as robotID
 	string vendorID = 3; // added this
-	LiftID liftID = 4;
+	int32 liftID = 4;
 	int32 boardingLevel = 5;
 	int32 destinationLevel = 6;
 	EmbarkationStatus embarkationStatus = 7;
@@ -213,13 +213,34 @@ message SecurityCheckpointRequest {
 	string robotID = 4;
 	string vendorID = 5;
 	string url = 6;
-	string timestamp = 7;
+	string key = 7;
+	string keyType = 8;
+	string timestamp = 9;
 }
 
 message ListRobotsAtSecurityRequest {
 	string requestID = 1;
 	string vendorID = 2;
 	string timestamp = 3;
+}
+
+//---------- webhook------//
+message CommonEventWebhook { //(3.3.2)
+	string vendorID = 1;
+	string robotID = 2;
+	string messageID = 3;
+	string timestamp = 4;
+	Event event = 5;
+}
+
+enum Event {
+	PASS_SECURITY = 0;
+	FAIL_SECURITY = 1;
+	FULL = 2;
+	FIRE_ALARM = 3;
+	PAUSE = 4;
+	RE_ROUTE = 5;
+	BUILDING_ACCESS_NOT_PERMITTED = 6;
 }
 
 //---------- future development------//
@@ -236,27 +257,27 @@ message Heartbeat // Heartbeats to services
 }
 
 //---------- from jtc_lift.proto ------//
-enum LiftID
-{
-	LIFT_UNDEFINED = 0;
-	LIFT_1 = 1;
-	LIFT_2 = 2;
-	LIFT_3 = 3;
-	LIFT_4 = 4;
-	LIFT_5 = 5;
-	LIFT_6 = 6;
-	LIFT_7 = 7;
-	LIFT_8 = 8;
-	LIFT_9 = 9;
-	LIFT_10 = 10;
-	LIFT_11 = 11;
-	LIFT_12 = 12;
-	LIFT_13 = 13;
-	LIFT_14 = 14;
-	LIFT_15 = 15;
-	LIFT_16 = 16;
-	LIFT_17 = 17;
-	LIFT_18 = 18;
-	LIFT_19 = 19;
-	LIFT_20 = 20;
-}
+//enum LiftID
+//{
+//	LIFT_UNDEFINED = 0;
+//	LIFT_1 = 1;
+//	LIFT_2 = 2;
+//	LIFT_3 = 3;
+//	LIFT_4 = 4;
+//	LIFT_5 = 5;
+//	LIFT_6 = 6;
+//	LIFT_7 = 7;
+//	LIFT_8 = 8;
+//	LIFT_9 = 9;
+//	LIFT_10 = 10;
+//	LIFT_11 = 11;
+//	LIFT_12 = 12;
+//	LIFT_13 = 13;
+//	LIFT_14 = 14;
+//	LIFT_15 = 15;
+//	LIFT_16 = 16;
+//	LIFT_17 = 17;
+//	LIFT_18 = 18;
+//	LIFT_19 = 19;
+//	LIFT_20 = 20;
+//}
