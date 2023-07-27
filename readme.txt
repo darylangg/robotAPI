@@ -1,6 +1,7 @@
-docker build . -t daryl/robot-api
+docker build . -t robot-api
 
 docker save -o target/robotapi.tar daryl/robot-api
+docker save robot-api | gzip > target/robotapi.tar.gz
 
 #!/bin/sh
 docker load --input robotapi.tar
