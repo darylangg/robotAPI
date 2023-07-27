@@ -21,12 +21,13 @@
     "dotenv": "^10.0.0",
     "goog": "^0.2.1",
     "google-protobuf": "^3.18.0-rc.2",
-    "hapi-agenda": "^0.9.1",
-    "hapi-auth-keycloak": "^5.1.2",
-    "hapi-cron": "^1.1.0",
+    "hapi-agenda": "^0.1.0",
+    "hapi-auth-keycloak": "^2.0.2",
+    "hapi-cron": "^1.0.5",
     "hapi-swagger": "^14.1.0",
     "joi": "^17.3.0",
+    "mongodb": "^5.7.0",
     "node-fetch": "^3.0.0",
-    "protobufjs": "^6.11.2"
+    "protobufjs": "^7.2.4"
   }
 }
